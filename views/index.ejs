@@ -1,23 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>URL Shortener</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1>URL Shortener</h1>
-  <form action="/shorten" method="POST">
-    <input type="url" name="longUrl" placeholder="Enter long URL" required>
-    <input type="text" name="customCode" placeholder="Custom short code (optional)">
-    <button type="submit">Shorten</button>
-  </form>
-  <h2>Recent Links</h2>
-  <ul>
-    <% urls.forEach(url => { %>
-      <li>
-        <a href="<%= url.shortUrl %>"><%= url.shortUrl %></a> → <%= url.longUrl %>
-      </li>
-    <% }) %>
-  </ul>
+  <div class="container">
+    <h1>🔗 URL Shortener</h1>
+
+    <!-- Create new URL form -->
+    <form action="/shorten" method="POST" class="shorten-form">
+      <input type="url" name="longUrl" placeholder="Enter long URL" required />
+      <input type="datetime-local" name="expiresAt" />
+      <button type="submit">Shorten</button>
+    </form>
+
+    <hr />
+
+    <!-- Display all short URLs -->
+    <h2>📝 Your URLs</h2>
+    <ul>
+      <% urls.forEach(url => { %>
+        <li>
+          <p>
+            <strong><a href="<%= url.shortUrl %>" target="_blank"><%= url.shortUrl %></a></strong><br/>
+            → <%= url.longUrl %><br/>
+            <% if (url.expiresAt) { %>
+              ⏳ Expires: <%= new Date(url.expiresAt).toLocaleString() %><br/>
+            <% } else { %>
+              ♾️ No expiration<br/>
+            <% } %>
+          </p>
+
+          <!-- Update/Delete form -->
+          <form class="crud-form" data-code="<%= url.shortCode %>">
+            <input type="url" name="longUrl" placeholder="New long URL" />
+            <input type="datetime-local" name="expiresAt" />
+            <button type="submit">Update</button>
+            <button type="button" class="delete-btn">Delete</button>
+          </form>
+
+          <hr/>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+
+  <script src="/crud.js"></script>
 </body>
 </html>

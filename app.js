@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const dataRoutes = require('./routes/data');
 const path = require('path');
 
 const shortenRoutes = require('./routes/shorten');
@@ -20,6 +21,7 @@ mongoose.connect(process.env.MONGO_URI, {
 
 app.use('/', redirectRoutes);
 app.use('/', shortenRoutes);
+app.use('/', dataRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

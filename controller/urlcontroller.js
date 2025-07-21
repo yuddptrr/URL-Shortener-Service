@@ -1,5 +1,5 @@
 const Url = require('../models/Url');
-const generateShortCode = require('../utils/generateShortCode');
+const generateShortCode = require('../util/generator');
 
 exports.showHomePage = async (req, res) => {
   const urls = await Url.find().sort({ date: -1 }).limit(10);

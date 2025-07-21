@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>URL Shortener</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>URL Shortener</h1>
+  <form action="/shorten" method="POST">
+    <input type="url" name="longUrl" placeholder="Enter long URL" required>
+    <input type="text" name="customCode" placeholder="Custom short code (optional)">
+    <button type="submit">Shorten</button>
+  </form>
+  <h2>Recent Links</h2>
+  <ul>
+    <% urls.forEach(url => { %>
+      <li>
+        <a href="<%= url.shortUrl %>"><%= url.shortUrl %></a> → <%= url.longUrl %>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

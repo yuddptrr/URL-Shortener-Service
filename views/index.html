@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>URL Shortener</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-xl mx-auto mt-10 bg-white p-8 rounded shadow">
+    <h1 class="text-3xl font-bold mb-6 text-blue-600 flex items-center gap-2"> URL Shortener</h1>
+
+  
+    <form id="shorten-form" class="mb-8 space-y-4">
+      <input type="url" name="longUrl" placeholder="Enter long URL" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <input type="datetime-local" name="expiresAt" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Shorten</button>
+    </form>
+
+    <hr class="my-6"/>
+
+    <h2 class="text-xl font-semibold mb-4"> Your URLs</h2>
+    <ul id="urls-list" class="space-y-6"></ul>
+  </div>
+
+  <script src="/crud.js"></script>
+  <script>
+
+    // Fetch and display URLs that already shortened
+    async function fetchUrls() {
+      const res = await fetch('/api/urls');
+      const urls = await res.json();
+      const list = document.getElementById('urls-list');
+      list.innerHTML = '';
+      urls.forEach(url => {
+        const li = document.createElement('li');
+        li.className = "bg-gray-50 p-4 rounded shadow";
+        li.innerHTML = `
+          <p>
+            <strong>
+              <a href="${url.shortUrl}" target="_blank" class="text-blue-600 underline">${url.shortUrl}</a>
+            </strong><br/>
+            → ${url.longUrl}<br/>
+            ${url.expiresAt ? ` Expires: ${new Date(url.expiresAt).toLocaleString()}<br/>` : ' No expiration<br/>'}
+          </p>
+          <form class="crud-form flex flex-col md:flex-row gap-2 mt-2" data-code="${url.shortCode}">
+            <input type="url" name="longUrl" placeholder="New long URL" class="flex-1 px-2 py-1 border rounded" />
+            <input type="datetime-local" name="expiresAt" class="flex-1 px-2 py-1 border rounded" />
+            <button type="submit" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Update</button>
+            <button type="button" class="delete-btn bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700">Delete</button>
+          </form>
+        `;
+        list.appendChild(li);
+      });
+      if (window.attachCrudHandlers) window.attachCrudHandlers();
+    }
+
+    document.getElementById('shorten-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const longUrl = form.longUrl.value;
+      const expiresAt = form.expiresAt.value;
+      const res = await fetch('/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ longUrl, expiresAt })
+      });
+      if (res.ok) {
+        form.reset();
+        fetchUrls();
+      } else {
+        alert('Failed to shorten URL');
+      }
+    });
+
+    window.attachCrudHandlers = function() {
+      document.querySelectorAll('.crud-form').forEach(form => {
+        const code = form.dataset.code;
+        // Update
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          const longUrl = form.querySelector('input[name="longUrl"]').value;
+          const expiresAt = form.querySelector('input[name="expiresAt"]').value;
+          const response = await fetch(`/api/urls/${code}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ longUrl, expiresAt })
+          });
+          if (response.ok) {
+            alert('Updated!');
+            fetchUrls();
+          } else {
+            alert('Update failed');
+          }
+        };
+        // Delete
+        form.querySelector('.delete-btn').onclick = async () => {
+          if (!confirm('Are you sure you wanna delete this shortened url?')) return;
+          const response = await fetch(`/api/urls/${code}`, { method: 'DELETE' });
+          if (response.ok) {
+            alert('Deleted!');
+            fetchUrls();
+          } else {
+            alert('Delete failed');
+          }
+        };
+      });
+    };
+
+    // Initial fetch
+    fetchUrls();
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 # URL-Shortener-Service
-A simple URL Shortener web application built with Node.js, Express, MongoDB, and EJS. 
+A simple URL Shortener web application built with Node.js, MongoDB, and EJS. 
 It allows users to shorten long URLs, redirect using short links, view all URLs, update existing entries (including optional expiration dates), and delete them. 
 This code use Express and MongoDB (via Mongoose), with routes for creating, retrieving, updating, and deleting URLs.
 The frontend is made by simple EJS templates with basic interactivity using JavaScript. 

@@ -1,20 +1,20 @@
 const Url = require('../models/Url');
-const generateShortCode = require('../util/generator');
+const shortid = require('shortid');
 
-//Showing the home page with the list of recently shortened URLs
+// Showing the home page with the list of recently shortened URLs
 exports.showHomePage = async (req, res) => {
   const urls = await Url.find().sort({ date: -1 }).limit(10);
   res.render('index', { urls });
 };
 
-//Creating a short URL
+// Creating a short URL
 exports.createShortUrl = async (req, res) => {
   const { longUrl, customCode } = req.body;
-  const expirationHours = parseInt(req.body.expirationHours) || 24; 
+  const expirationHours = parseInt(req.body.expirationHours) || 24;
 
   if (!longUrl) return res.status(400).send('Missing long URL');
 
-  let code = customCode || generateShortCode();
+  let code = customCode || shortid.generate();
   const existing = await Url.findOne({ shortCode: code });
 
   if (existing) return res.status(409).send('Custom code already in use');
@@ -33,7 +33,7 @@ exports.createShortUrl = async (req, res) => {
   res.redirect('/');
 };
 
-//Handling the redirect from the generated short URLs
+// Handling the redirect from the generated short URLs
 exports.handleRedirect = async (req, res) => {
   const { shortCode } = req.params;
   const url = await Url.findOne({ shortCode });

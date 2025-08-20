@@ -6,7 +6,7 @@
   <title>URL Shortener</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-blue-100">
   <div class="max-w-xl mx-auto mt-10 bg-white p-8 rounded shadow">
     <h1 class="text-3xl font-bold mb-6 text-blue-600 flex items-center gap-2"> URL Shortener</h1>
 
@@ -36,23 +36,33 @@
         const li = document.createElement('li');
         li.className = "bg-gray-50 p-4 rounded shadow";
         li.innerHTML = `
-          <p>
-            <strong>
-              <a href="${url.shortUrl}" target="_blank" class="text-blue-600 underline">${url.shortUrl}</a>
-            </strong><br/>
-            → ${url.longUrl}<br/>
-            ${url.expiresAt ? ` Expires: ${new Date(url.expiresAt).toLocaleString()}<br/>` : ' No expiration<br/>'}
-          </p>
-          <form class="crud-form flex flex-col md:flex-row gap-2 mt-2" data-code="${url.shortCode}">
-            <input type="url" name="longUrl" placeholder="New long URL" class="flex-1 px-2 py-1 border rounded" />
-            <input type="datetime-local" name="expiresAt" class="flex-1 px-2 py-1 border rounded" />
-            <button type="submit" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Update</button>
-            <button type="button" class="delete-btn bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700">Delete</button>
-          </form>
+          <div>
+            <p>
+              <strong>
+                <a href="${url.shortUrl}" target="_blank" class="text-blue-600 underline">${url.shortUrl}</a>
+              </strong><br/>
+              → ${url.longUrl}<br/>
+              ${url.expiresAt ? `Expires: ${new Date(url.expiresAt).toLocaleString()}<br/>` : 'No expiration<br/>'}
+            </p>
+            <div class="relative inline-block text-left mt-2">
+              <button type="button" class="edit-dropdown-btn bg-cyan-600 text-white px-4 py-1 rounded hover:bg-blue-700" data-code="${url.shortCode}">
+                Edit
+              </button>
+              <div class="dropdown-menu hidden absolute z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 p-4">
+                <form class="crud-form flex flex-col gap-2" data-code="${url.shortCode}">
+                  <input type="url" name="longUrl" placeholder="New long URL" class="px-2 py-1 border rounded" />
+                  <input type="datetime-local" name="expiresAt" class="px-2 py-1 border rounded" value="${url.expiresAt ? new Date(url.expiresAt).toISOString().slice(0,16) : ''}" />
+                  <button type="submit" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Update</button>
+                  <button type="button" class="delete-btn bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
         `;
         list.appendChild(li);
       });
       if (window.attachCrudHandlers) window.attachCrudHandlers();
+      attachDropdownHandlers();
     }
 
     document.getElementById('shorten-form').addEventListener('submit', async (e) => {
@@ -72,6 +82,24 @@
         alert('Failed to shorten URL');
       }
     });
+
+    function attachDropdownHandlers() {
+      document.querySelectorAll('.edit-dropdown-btn').forEach(btn => {
+        btn.onclick = function(e) {
+          e.preventDefault();
+          // Hide all other dropdowns
+          document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+          // Show this one
+          btn.nextElementSibling.classList.toggle('hidden');
+        };
+      });
+      // Hide dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative')) {
+          document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+        }
+      });
+    }
 
     window.attachCrudHandlers = function() {
       document.querySelectorAll('.crud-form').forEach(form => {
